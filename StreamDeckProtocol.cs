@@ -44,7 +44,7 @@ namespace CompanionCorpse.StreamDeck
                 string.IsNullOrEmpty(registerEvent) ||
                 string.IsNullOrEmpty(info))
                 return null;
-            return NewConnection(port, pluginUUID, registerEvent, new JFile(info));
+            return NewConnection(port, pluginUUID, registerEvent, JParser.Parse(info));
         }
 
         public static StreamDeckProtocol? NewConnection(int port, string pluginUUID, string registerEvent, JObject info)
@@ -72,7 +72,7 @@ namespace CompanionCorpse.StreamDeck
 
         protected override void OnWSMessage(string message)
         {
-            JFile receivedEvent = new(message);
+            JObject receivedEvent = JParser.Parse(message);
             if (receivedEvent.TryGet("action", out string? actionID) &&
                 receivedEvent.TryGet("event", out string? @event) &&
                 receivedEvent.TryGet("context", out string? context) &&
