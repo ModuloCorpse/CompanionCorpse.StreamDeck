@@ -3,9 +3,9 @@ using CorpseLib.Network;
 using CorpseLib.Web;
 using CorpseLib.Web.Http;
 
-namespace CompanionCorpse.StreamDeck
+namespace CorpseRemote.StreamDeck
 {
-    public class StreamDeckProtocol(string uuid, string registerEvent, JObject info) : WebSocketProtocol
+    public class StreamDeckProtocol(string uuid, string registerEvent, JsonObject info) : WebSocketProtocol
     {
         public static StreamDeckProtocol? NewConnection(string[] args)
         {
@@ -44,10 +44,10 @@ namespace CompanionCorpse.StreamDeck
                 string.IsNullOrEmpty(registerEvent) ||
                 string.IsNullOrEmpty(info))
                 return null;
-            return NewConnection(port, pluginUUID, registerEvent, JParser.Parse(info));
+            return NewConnection(port, pluginUUID, registerEvent, JsonParser.Parse(info));
         }
 
-        public static StreamDeckProtocol? NewConnection(int port, string pluginUUID, string registerEvent, JObject info)
+        public static StreamDeckProtocol? NewConnection(int port, string pluginUUID, string registerEvent, JsonObject info)
         {
             StreamDeckProtocol protocol = new(pluginUUID, registerEvent, info);
             TCPAsyncClient twitchIRCClient = new(protocol, URI.Build("ws").Host("localhost").Port(port).Build());
@@ -56,13 +56,13 @@ namespace CompanionCorpse.StreamDeck
         }
 
 
-        private readonly JObject m_Info = info;
+        private readonly JsonObject m_Info = info;
         private readonly string m_UUID = uuid;
         private readonly string m_RegisterEvent = registerEvent;
 
         protected override void OnWSOpen(Response message)
         {
-            JObject obj = new()
+            JsonObject obj = new()
             {
                 { "event", m_RegisterEvent },
                 { "uuid", m_UUID }
@@ -72,14 +72,14 @@ namespace CompanionCorpse.StreamDeck
 
         protected override void OnWSMessage(string message)
         {
-            JObject receivedEvent = JParser.Parse(message);
+            JsonObject receivedEvent = JsonParser.Parse(message);
             if (receivedEvent.TryGet("action", out string? actionID) &&
                 receivedEvent.TryGet("event", out string? @event) &&
                 receivedEvent.TryGet("context", out string? context) &&
                 receivedEvent.TryGet("device", out string? device) &&
-                receivedEvent.TryGet("payload", out JObject? payload) &&
-                payload!.TryGet("settings", out JObject? settings) &&
-                payload.TryGet("coordinates", out JObject? coordinates) &&
+                receivedEvent.TryGet("payload", out JsonObject? payload) &&
+                payload!.TryGet("settings", out JsonObject? settings) &&
+                payload.TryGet("coordinates", out JsonObject? coordinates) &&
                 coordinates!.TryGet("column", out int? column) &&
                 coordinates.TryGet("row", out int? row) &&
                 payload.TryGet("isInMultiAction", out bool? isInMultiAction))
