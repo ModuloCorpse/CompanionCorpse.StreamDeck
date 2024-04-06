@@ -3,7 +3,7 @@ using CorpseLib.Network;
 using CorpseLib.Web;
 using CorpseLib.Web.Http;
 
-namespace CorpseRemote.StreamDeck
+namespace StreamDeckCorpse
 {
     public class StreamDeckProtocol(string uuid, string registerEvent, JsonObject info) : WebSocketProtocol
     {
