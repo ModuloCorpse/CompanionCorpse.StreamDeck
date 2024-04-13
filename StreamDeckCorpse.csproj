@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CompanionCorpse\CorpseRemote.csproj" />
     <ProjectReference Include="..\CorpseLib.Remote\CorpseLib.Remote.csproj" />
     <ProjectReference Include="..\CorpseLib.Web\CorpseLib.Web.csproj" />
   </ItemGroup>
