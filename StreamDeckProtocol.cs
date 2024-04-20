@@ -1,11 +1,12 @@
-﻿using CorpseLib.Json;
+﻿using CorpseLib.DataNotation;
+using CorpseLib.Json;
 using CorpseLib.Network;
 using CorpseLib.Web;
 using CorpseLib.Web.Http;
 
 namespace StreamDeckCorpse
 {
-    public class StreamDeckProtocol(string uuid, string registerEvent, JsonObject info) : WebSocketProtocol
+    public class StreamDeckProtocol(string uuid, string registerEvent, DataObject info) : WebSocketProtocol
     {
         public static StreamDeckProtocol? NewConnection(string[] args)
         {
@@ -47,7 +48,7 @@ namespace StreamDeckCorpse
             return NewConnection(port, pluginUUID, registerEvent, JsonParser.Parse(info));
         }
 
-        public static StreamDeckProtocol? NewConnection(int port, string pluginUUID, string registerEvent, JsonObject info)
+        public static StreamDeckProtocol? NewConnection(int port, string pluginUUID, string registerEvent, DataObject info)
         {
             StreamDeckProtocol protocol = new(pluginUUID, registerEvent, info);
             TCPAsyncClient twitchIRCClient = new(protocol, URI.Build("ws").Host("localhost").Port(port).Build());
@@ -56,30 +57,30 @@ namespace StreamDeckCorpse
         }
 
 
-        private readonly JsonObject m_Info = info;
+        private readonly DataObject m_Info = info;
         private readonly string m_UUID = uuid;
         private readonly string m_RegisterEvent = registerEvent;
 
         protected override void OnWSOpen(Response message)
         {
-            JsonObject obj = new()
+            DataObject obj = new()
             {
                 { "event", m_RegisterEvent },
                 { "uuid", m_UUID }
             };
-            Send(obj.ToNetworkString());
+            Send(JsonParser.NetStr(obj));
         }
 
         protected override void OnWSMessage(string message)
         {
-            JsonObject receivedEvent = JsonParser.Parse(message);
+            DataObject receivedEvent = JsonParser.Parse(message);
             if (receivedEvent.TryGet("action", out string? actionID) &&
                 receivedEvent.TryGet("event", out string? @event) &&
                 receivedEvent.TryGet("context", out string? context) &&
                 receivedEvent.TryGet("device", out string? device) &&
-                receivedEvent.TryGet("payload", out JsonObject? payload) &&
-                payload!.TryGet("settings", out JsonObject? settings) &&
-                payload.TryGet("coordinates", out JsonObject? coordinates) &&
+                receivedEvent.TryGet("payload", out DataObject? payload) &&
+                payload!.TryGet("settings", out DataObject? settings) &&
+                payload.TryGet("coordinates", out DataObject? coordinates) &&
                 coordinates!.TryGet("column", out int? column) &&
                 coordinates.TryGet("row", out int? row) &&
                 payload.TryGet("isInMultiAction", out bool? isInMultiAction))
